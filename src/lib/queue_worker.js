@@ -595,12 +595,13 @@ QueueWorker.prototype._setUpTimeouts = function() {
       var now = new Date().getTime();
       var startTime = (snapshot.child('_state_changed').val() || now);
       var expires = Math.max(0, startTime - now + self.taskTimeout);
-      var ref = _getRef(snapshot);
+      var reject = self._reject(self.taskNumber);
       self.owners[taskName] = snapshot.child('_owner').val();
+
       self.expiryTimeouts[taskName] = setTimeout(
-        self._resetTask.bind(self),
+        reject,
         expires,
-        ref, false);
+        'Timed out after ' + self.taskTimeout);
     };
 
     self.processingTaskAddedListener = self.processingTasksRef.on('child_added',
